@@ -32,10 +32,14 @@ export default function HomePage() {
     }
 
     try {
+
+      const token = localStorage.getItem("token");
+
       const res = await fetch("http://localhost:3002/bookings",{
         method: "POST",
         headers: {
-          "Content-type": "application/json"
+          "Content-type": "application/json",
+          "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify({
         patient_name: formData.name,        
