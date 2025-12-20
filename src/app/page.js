@@ -15,7 +15,7 @@ export default function HomePage() {
   useEffect(() => {
     const fetchDoctors = async () => {
       try {
-        const res = await fetch("http://localhost:3001/doctors"); // sesuaikan dengan DOCTOR_SERVICE_URL
+        const res = await fetch("/api/doctors/doctors"); // sesuaikan dengan DOCTOR_SERVICE_URL
         const data = await res.json();
         setDoctors(data.rows || data);
       } catch (err) {
@@ -35,7 +35,7 @@ export default function HomePage() {
 
       const token = localStorage.getItem("token");
 
-      const res = await fetch("http://localhost:3002/bookings",{
+      const res = await fetch("/api/bookings/bookings",{
         method: "POST",
         headers: {
           "Content-type": "application/json",

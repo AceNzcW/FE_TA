@@ -31,7 +31,7 @@ export default function DoctorsPage() {
   async function fetchDoctors(token) {
     try {
       setLoading(true);
-      const res = await fetch("http://localhost:3001/doctors", {
+      const res = await fetch("/api/doctors/doctors", {
         headers: {
           "Authorization": `Bearer ${token}`, // ✅ kirim token ke backend
         },
@@ -55,7 +55,7 @@ export default function DoctorsPage() {
 
       let res, doctorData;
       if (editingId) {
-        res = await fetch(`http://localhost:3001/doctors/${editingId}`, {
+        res = await fetch(`/api/doctors/doctors/${editingId}`, {
           method: "PUT",
           headers: { 
             "Content-Type": "application/json",
@@ -70,7 +70,7 @@ export default function DoctorsPage() {
         );
         setEditingId(null);
       } else {
-        res = await fetch("http://localhost:3001/doctors", {
+        res = await fetch("/api/doctors/doctors", {
           method: "POST",
           headers: { 
             "Content-Type": "application/json",
@@ -114,7 +114,7 @@ export default function DoctorsPage() {
       const token = localStorage.getItem("token");
       if (!token) return router.push("/login");
 
-      const res = await fetch(`http://localhost:3001/doctors/${id}`, {
+      const res = await fetch(`/api/doctors/doctors/${id}`, {
         method: "DELETE",
         headers: {
           "Authorization": `Bearer ${token}`
