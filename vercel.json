@@ -1,17 +1,17 @@
 {
     "rewrites": [
         {
-            "source": "/api-backend/:path*",
+            "source": "/api/doctors/:path*",
             "destination": "http://34.192.221.203:3001/:path*"
         },
 
         {
-            "source": "/api-backend/:path*",
+            "source": "/api/bookings/:path*",
             "destination": "http://34.192.221.203:3002/:path*"
         },
-        
+
         {
-            "source": "/api-backend/:path*",
+            "source": "/api/auth/:path*",
             "destination": "http://34.192.221.203:3003/:path*"
         }
     ]
