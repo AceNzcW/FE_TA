@@ -2,7 +2,7 @@
     "rewrites": [
         {
             "source": "/api/doctors/:path*",
-            "destination": "http://34.192.221.203:3001/:path*"
+            "destination": "http://34.192.221.203:3001/doctors/:path*"
         },
 
         {
