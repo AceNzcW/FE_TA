@@ -29,7 +29,7 @@ export default function BookingPage() {
 
   async function fetchBookings(token) {
     try {
-      const res = await fetch("/api/bookings/bookings", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BOOKING_SERVICE_URL}`, {
         headers: {
           "Authorization": `Bearer ${token}`
         }
@@ -50,7 +50,7 @@ export default function BookingPage() {
       const token = localStorage.getItem("token");
       if (!token) return router.push("/login");
 
-      const res = await fetch(`/api/bookings/bookings/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BOOKING_SERVICE_URL}/${id}`, {
         method: "DELETE",
         headers: {
           "Authorization": `Bearer ${token}`
@@ -81,7 +81,7 @@ export default function BookingPage() {
       const token = localStorage.getItem("token");
       if (!token) return router.push("/login");
 
-      const res = await fetch(`/api/bookings/bookings/${editBooking}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BOOKING_SERVICE_URL}/${editBooking}`, {
         method: "PUT",
         headers: { 
           "Content-Type": "application/json",
@@ -123,7 +123,7 @@ export default function BookingPage() {
 
   async function fetchQueue() {
     try {
-      const res = await fetch("/api/bookings/bookings/queue");
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BOOKING_SERVICE_URL}/queue`);
       const data = await res.json();
       setQueue(data.last_number);
     } catch (err) {
@@ -133,7 +133,7 @@ export default function BookingPage() {
 
   async function resetQueue() {
     try {
-      await fetch("/api/bookings/bookings/queue/reset", { method: "POST" });
+      await fetch(`${process.env.NEXT_PUBLIC_BOOKING_SERVICE_URL}/queue/reset`, { method: "POST" });
       alert("Nomor antrean berhasil direset!");
       fetchQueue(); // refresh data
     } catch (err) {
@@ -164,7 +164,7 @@ export default function BookingPage() {
       <div>
         <button
         onClick={async () => {
-          await fetch("/api/bookings/bookings/queue/reset", { method: "POST" });
+          await fetch(`${process.env.NEXT_PUBLIC_BOOKING_SERVICE_URL}/queue/reset`, { method: "POST" });
           alert("Nomor antrean berhasil direset!");
         }}
         className="bg-red-500 text-white px-4 py-2 rounded"
