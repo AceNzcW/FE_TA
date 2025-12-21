@@ -30,22 +30,27 @@ export default function DoctorsPage() {
   async function fetchDoctors(token) {
     try {
       setLoading(true);
-      const res = await fetch(process.env.NEXT_PUBLIC_DOCTOR_SERVICE_URL, {
+      setError(null);
+      // Menggunakan URL langsung dari Env (Pastikan di Vercel nilainya adalah "/api/doctors")
+      const res = await fetch(`${process.env.NEXT_PUBLIC_DOCTOR_SERVICE_URL}`, {
         headers: { "Authorization": `Bearer ${token}` },
       });
-
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-
-      // Cek apakah response benar-benar JSON
+      
+      if (!res.ok) throw new Error(`Gagal memuat data (Status: ${res.status})`);
+      
+      // Validasi Content-Type untuk menghindari SyntaxError "<!DOCTYPE"
       const contentType = res.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
-        throw new TypeError("Server tidak mengirimkan JSON!");
+        throw new TypeError("Server tidak mengirimkan JSON yang valid");
       }
 
       const data = await res.json();
-      setDoctors(Array.isArray(data) ? data : (data.rows || []));
+      const doctorData = Array.isArray(data) ? data : (data.rows || []);
+      setDoctors(doctorData);
     } catch (err) {
+      console.error("Fetch error:", err);
       setError(err.message);
+      setDoctors([]); 
     } finally {
       setLoading(false);
     }
@@ -57,44 +62,34 @@ export default function DoctorsPage() {
       const token = localStorage.getItem("token");
       if (!token) return router.push("/login");
 
-      let res, doctorData;
-      // ✅ PERBAIKAN: Gunakan URL dari Env untuk semua method (PUT/POST)
       const baseUrl = process.env.NEXT_PUBLIC_DOCTOR_SERVICE_URL;
+      const url = editingId ? `${baseUrl}/${editingId}` : baseUrl;
+      const method = editingId ? "PUT" : "POST";
 
+      const res = await fetch(url, {
+        method: method,
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(form),
+      });
+
+      if (!res.ok) throw new Error(`Gagal ${editingId ? 'update' : 'tambah'} dokter`);
+      
+      const doctorData = await res.json();
+      
       if (editingId) {
-        res = await fetch(`${baseUrl}/${editingId}`, {
-          method: "PUT",
-          headers: { 
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-          },
-          body: JSON.stringify(form),
-        });
-        if (!res.ok) throw new Error("Gagal update dokter");
-        doctorData = await res.json();
-        setDoctors((prev) =>
-          prev.map((d) => (d.id === editingId ? doctorData : d))
-        );
+        setDoctors((prev) => prev.map((d) => (d.id === editingId ? doctorData : d)));
         setEditingId(null);
       } else {
-        res = await fetch(`${baseUrl}`, {
-          method: "POST",
-          headers: { 
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-          },
-          body: JSON.stringify(form),
-        });
-        if (!res.ok) throw new Error("Gagal menambahkan dokter");
-        doctorData = await res.json();
         setDoctors((prev) => [...prev, doctorData]);
       }
 
       setForm({ name: "", specialization: "", schedule: "", email: "" });
       setShowForm(false);
     } catch (err) {
-      console.error(err);
-      alert(err.message || "Terjadi kesalahan!");
+      alert(err.message);
     }
   }
 
@@ -102,21 +97,28 @@ export default function DoctorsPage() {
     if (!confirm("Yakin ingin menghapus dokter ini?")) return;
     try {
       const token = localStorage.getItem("token");
-      if (!token) return router.push("/login");
-
       const res = await fetch(`${process.env.NEXT_PUBLIC_DOCTOR_SERVICE_URL}/${id}`, {
         method: "DELETE",
-        headers: {
-          "Authorization": `Bearer ${token}`
-        }
+        headers: { "Authorization": `Bearer ${token}` }
       });
       if (!res.ok) throw new Error("Gagal menghapus dokter");
       setDoctors((prev) => prev.filter((d) => d.id !== id));
     } catch (err) {
-      console.error(err);
-      alert("Gagal menghapus dokter!");
+      alert(err.message);
     }
   }
+
+  const handleEdit = (d) => {
+    setEditingId(d.id);
+    setForm({ name: d.name, specialization: d.specialization, schedule: d.schedule, email: d.email || "" });
+    setShowForm(true);
+  };
+
+  const handleCancel = () => {
+    setShowForm(false);
+    setEditingId(null);
+    setForm({ name: "", specialization: "", schedule: "", email: "" });
+  };
 
   if (loading) {
     return (

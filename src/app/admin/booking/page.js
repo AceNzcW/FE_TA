@@ -9,7 +9,6 @@ export default function BookingPage() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editBooking, setEditBooking] = useState(null);
-  const [queue, setQueue] = useState(null);
   const [form, setForm] = useState({
     nama_pasien: "",
     contact_pasien: "",
@@ -21,7 +20,7 @@ export default function BookingPage() {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
-      router.push("/login"); // redirect kalau belum login
+      router.push("/login");
     } else {
       fetchBookings(token);
     }
@@ -29,14 +28,20 @@ export default function BookingPage() {
 
   async function fetchBookings(token) {
     try {
+      // Pastikan URL hanya dari Env
       const res = await fetch(`${process.env.NEXT_PUBLIC_BOOKING_SERVICE_URL}`, {
-        headers: {
-          "Authorization": `Bearer ${token}`
-        }
+        headers: { "Authorization": `Bearer ${token}` }
       });
+      
       if (!res.ok) throw new Error("Gagal memuat booking");
+      
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new TypeError("Server Error: Bukan format JSON");
+      }
+
       const data = await res.json();
-      setBookings(data);
+      setBookings(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Gagal fetch booking:", err);
     } finally {
@@ -44,43 +49,10 @@ export default function BookingPage() {
     }
   }
 
-  async function handleDelete(id) {
-    if (!confirm("Yakin hapus booking ini?")) return;
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) return router.push("/login");
-
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BOOKING_SERVICE_URL}/${id}`, {
-        method: "DELETE",
-        headers: {
-          "Authorization": `Bearer ${token}`
-        }
-      });
-      if (!res.ok) throw new Error("Gagal hapus booking");
-      setBookings((prev) => prev.filter((b) => b.id !== id));
-    } catch (err) {
-      console.error(err);
-      alert("Gagal hapus booking!");
-    }
-  }
-
-  function handleEdit(b) {
-    setEditBooking(b.id);
-    setForm({
-      nama_pasien: b.nama_pasien,
-      contact_pasien: b.contact,
-      dokter: b.dokter,
-      tanggal: b.tanggal,
-      status: b.status,
-    });
-  }
-
   async function handleUpdate(e) {
     e.preventDefault();
     try {
       const token = localStorage.getItem("token");
-      if (!token) return router.push("/login");
-
       const res = await fetch(`${process.env.NEXT_PUBLIC_BOOKING_SERVICE_URL}/${editBooking}`, {
         method: "PUT",
         headers: { 
@@ -92,52 +64,61 @@ export default function BookingPage() {
       if (!res.ok) throw new Error("Gagal update booking");
       const updated = await res.json();
 
-      setBookings((prev) =>
-        prev.map((b) => (b.id === editBooking ? updated : b))
-      );
-      setEditBooking(null);
-      setForm({ nama_pasien: "", contact_pasien: "", dokter: "", tanggal: "", status: "" });
+      setBookings((prev) => prev.map((b) => (b.id === editBooking ? updated : b)));
+      handleCancel();
     } catch (err) {
-      console.error(err);
-      alert("Gagal update booking!");
+      alert(err.message);
     }
   }
 
-  function handleCancel() {
+  async function handleDelete(id) {
+    if (!confirm("Yakin hapus booking ini?")) return;
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BOOKING_SERVICE_URL}/${id}`, {
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error("Gagal hapus booking");
+      setBookings((prev) => prev.filter((b) => b.id !== id));
+    } catch (err) {
+      alert(err.message);
+    }
+  }
+
+  async function resetQueue() {
+    if(!confirm("Reset nomor antrean?")) return;
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BOOKING_SERVICE_URL}/queue/reset`, { method: "POST" });
+      if(res.ok) alert("Nomor antrean berhasil direset!");
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  // --- UI TETAP SAMA ---
+  const handleEdit = (b) => {
+    setEditBooking(b.id);
+    setForm({
+      nama_pasien: b.nama_pasien,
+      contact_pasien: b.contact,
+      dokter: b.dokter,
+      tanggal: b.tanggal.split('T')[0], // format date input
+      status: b.status,
+    });
+  };
+
+  const handleCancel = () => {
     setEditBooking(null);
     setForm({ nama_pasien: "", contact_pasien: "", dokter: "", tanggal: "", status: "" });
-  }
+  };
 
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
-      case "selesai":
-        return "bg-green-100 text-green-700 border-green-200";
-      case "pending":
-        return "bg-yellow-100 text-yellow-700 border-yellow-200";
-      case "batal":
-        return "bg-red-100 text-red-700 border-red-200";
-      default:
-        return "bg-slate-100 text-slate-700 border-slate-200";
-    }
-  };
-
-  async function fetchQueue() {
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BOOKING_SERVICE_URL}/queue`);
-      const data = await res.json();
-      setQueue(data.last_number);
-    } catch (err) {
-      console.error("Gagal fetch queue:", err);
-    }
-  };
-
-  async function resetQueue() {
-    try {
-      await fetch(`${process.env.NEXT_PUBLIC_BOOKING_SERVICE_URL}/queue/reset`, { method: "POST" });
-      alert("Nomor antrean berhasil direset!");
-      fetchQueue(); // refresh data
-    } catch (err) {
-      console.error("Gagal reset queue:", err);
+      case "selesai": return "bg-green-100 text-green-700 border-green-200";
+      case "pending": return "bg-yellow-100 text-yellow-700 border-yellow-200";
+      case "batal": return "bg-red-100 text-red-700 border-red-200";
+      default: return "bg-slate-100 text-slate-700 border-slate-200";
     }
   };
 
