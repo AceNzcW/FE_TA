@@ -31,7 +31,7 @@ export default function DoctorsPage() {
   async function fetchDoctors(token) {
     try {
       setLoading(true);
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BOOKING_SERVICE_URL}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_DOCTOR_SERVICE_URL}`, {
         headers: {
           "Authorization": `Bearer ${token}`, // ✅ kirim token ke backend
         },
@@ -55,7 +55,7 @@ export default function DoctorsPage() {
 
       let res, doctorData;
       if (editingId) {
-        res = await fetch(`${process.env.NEXT_PUBLIC_BOOKING_SERVICE_URL}/${editingId}`, {
+        res = await fetch(`${process.env.NEXT_PUBLIC_DOCTOR_SERVICE_URL}/${editingId}`, {
           method: "PUT",
           headers: { 
             "Content-Type": "application/json",
@@ -114,7 +114,7 @@ export default function DoctorsPage() {
       const token = localStorage.getItem("token");
       if (!token) return router.push("/login");
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BOOKING_SERVICE_URL}/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_DOCTOR_SERVICE_UR}/${id}`, {
         method: "DELETE",
         headers: {
           "Authorization": `Bearer ${token}`
