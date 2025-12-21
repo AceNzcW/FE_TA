@@ -30,25 +30,22 @@ export default function DoctorsPage() {
   async function fetchDoctors(token) {
     try {
       setLoading(true);
-      setError(null);
-      // ✅ PERBAIKAN: Gunakan DOCTOR_SERVICE_URL, bukan BOOKING
-      const res = await fetch(`${process.env.NEXT_PUBLIC_DOCTOR_SERVICE_URL}`, {
-        headers: {
-          "Authorization": `Bearer ${token}`,
-        },
+      const res = await fetch(process.env.NEXT_PUBLIC_DOCTOR_SERVICE_URL, {
+        headers: { "Authorization": `Bearer ${token}` },
       });
-      
-      if (!res.ok) throw new Error("Gagal memuat data dokter");
-      
+
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+
+      // Cek apakah response benar-benar JSON
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new TypeError("Server tidak mengirimkan JSON!");
+      }
+
       const data = await res.json();
-      
-      // ✅ PERBAIKAN: Validasi tipe data array
-      const doctorData = Array.isArray(data) ? data : (data.rows || []);
-      setDoctors(doctorData);
+      setDoctors(Array.isArray(data) ? data : (data.rows || []));
     } catch (err) {
-      console.error("Fetch error:", err);
       setError(err.message);
-      setDoctors([]); // Fallback ke array kosong agar tidak crash
     } finally {
       setLoading(false);
     }
