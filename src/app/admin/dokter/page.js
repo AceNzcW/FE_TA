@@ -18,11 +18,10 @@ export default function DoctorsPage() {
   });
   const [editingId, setEditingId] = useState(null);
 
-  // ✅ Cek login saat halaman dibuka
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
-      router.push("/login"); // redirect ke login kalau belum login
+      router.push("/login");
     } else {
       fetchDoctors(token);
     }
@@ -31,17 +30,25 @@ export default function DoctorsPage() {
   async function fetchDoctors(token) {
     try {
       setLoading(true);
+      setError(null);
+      // ✅ PERBAIKAN: Gunakan DOCTOR_SERVICE_URL, bukan BOOKING
       const res = await fetch(`${process.env.NEXT_PUBLIC_DOCTOR_SERVICE_URL}`, {
         headers: {
-          "Authorization": `Bearer ${token}`, // ✅ kirim token ke backend
+          "Authorization": `Bearer ${token}`,
         },
       });
+      
       if (!res.ok) throw new Error("Gagal memuat data dokter");
+      
       const data = await res.json();
-      setDoctors(data);
+      
+      // ✅ PERBAIKAN: Validasi tipe data array
+      const doctorData = Array.isArray(data) ? data : (data.rows || []);
+      setDoctors(doctorData);
     } catch (err) {
       console.error("Fetch error:", err);
       setError(err.message);
+      setDoctors([]); // Fallback ke array kosong agar tidak crash
     } finally {
       setLoading(false);
     }
@@ -54,8 +61,11 @@ export default function DoctorsPage() {
       if (!token) return router.push("/login");
 
       let res, doctorData;
+      // ✅ PERBAIKAN: Gunakan URL dari Env untuk semua method (PUT/POST)
+      const baseUrl = process.env.NEXT_PUBLIC_DOCTOR_SERVICE_URL;
+
       if (editingId) {
-        res = await fetch(`${process.env.NEXT_PUBLIC_DOCTOR_SERVICE_URL}/${editingId}`, {
+        res = await fetch(`${baseUrl}/${editingId}`, {
           method: "PUT",
           headers: { 
             "Content-Type": "application/json",
@@ -70,7 +80,7 @@ export default function DoctorsPage() {
         );
         setEditingId(null);
       } else {
-        res = await fetch("/api/doctors/doctors", {
+        res = await fetch(`${baseUrl}`, {
           method: "POST",
           headers: { 
             "Content-Type": "application/json",
@@ -87,25 +97,8 @@ export default function DoctorsPage() {
       setShowForm(false);
     } catch (err) {
       console.error(err);
-      alert("Terjadi kesalahan!");
+      alert(err.message || "Terjadi kesalahan!");
     }
-  }
-
-    function handleEdit(doctor) {
-    setForm({
-      name: doctor.name,
-      specialization: doctor.specialization,
-      schedule: doctor.schedule,
-      email: doctor.email || "",
-    });
-    setEditingId(doctor.id);
-    setShowForm(true);
-  }
-
-  function handleCancel() {
-    setForm({ name: "", specialization: "", schedule: "", email: "" });
-    setEditingId(null);
-    setShowForm(false);
   }
 
   async function handleDelete(id) {
@@ -114,7 +107,7 @@ export default function DoctorsPage() {
       const token = localStorage.getItem("token");
       if (!token) return router.push("/login");
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_DOCTOR_SERVICE_UR}/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_DOCTOR_SERVICE_URL}/${id}`, {
         method: "DELETE",
         headers: {
           "Authorization": `Bearer ${token}`
