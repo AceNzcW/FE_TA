@@ -15,7 +15,7 @@ export default function HomePage() {
   useEffect(() => {
     const fetchDoctors = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_BOOKING_SERVICE_URL}`); // sesuaikan dengan DOCTOR_SERVICE_URL
+        const res = await fetch(`${process.env.NEXT_PUBLIC_DOCTOR_SERVICE_URL}`); // sesuaikan dengan DOCTOR_SERVICE_URL
         const data = await res.json();
         setDoctors(data.rows || data);
       } catch (err) {
