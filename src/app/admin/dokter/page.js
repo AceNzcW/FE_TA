@@ -32,7 +32,7 @@ export default function DoctorsPage() {
       setLoading(true);
       setError(null);
       // Menggunakan URL langsung dari Env (Pastikan di Vercel nilainya adalah "/api/doctors")
-      const res = await fetch(`${process.env.NEXT_PUBLIC_DOCTOR_SERVICE_URL}`, {
+      const res = await fetch("/api/doctors/", {
         headers: { "Authorization": `Bearer ${token}` },
       });
       
