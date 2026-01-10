@@ -11,11 +11,12 @@ export default function HomePage() {
   });
 
   const [doctors, setDoctors] = useState([]);
+  const [selectedDoctor, setSelectedDoctor] = useState(null);
 
   useEffect(() => {
     const fetchDoctors = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_DOCTOR_SERVICE_URL}`); // sesuaikan dengan DOCTOR_SERVICE_URL
+        const res = await fetch(`${process.env.NEXT_PUBLIC_DOCTOR_SERVICE_URL}`);
         const data = await res.json();
         setDoctors(data.rows || data);
       } catch (err) {
@@ -25,6 +26,12 @@ export default function HomePage() {
     fetchDoctors();
   }, []);
 
+  const handleDoctorChange = (doctorId) => {
+    setFormData({...formData, doctor: doctorId});
+    const doctor = doctors.find(d => d.id === parseInt(doctorId));
+    setSelectedDoctor(doctor || null);
+  };
+
   const handleSubmit = async () => {
     if (!formData.name || !formData.contact || !formData.doctor || !formData.date){
       alert("Mohon lengkapi semua data!");
@@ -32,7 +39,6 @@ export default function HomePage() {
     }
 
     try {
-
       const token = localStorage.getItem("token");
 
       const res = await fetch(`${process.env.NEXT_PUBLIC_BOOKING_SERVICE_URL}`,{
@@ -58,6 +64,7 @@ export default function HomePage() {
 
       alert("Booking berhasil dibuat! Tim kami akan menghubungi anda");
       setFormData({ name: "", contact: "", doctor: "", date: ""});
+      setSelectedDoctor(null);
     }catch (err){
       console.error("Error submit booking:", err);
       alert("Mohon lengkapi data");
@@ -198,16 +205,31 @@ export default function HomePage() {
               <label className="block text-gray-700 mb-2 font-semibold">👨‍⚕️ Pilih Dokter</label>
               <select 
                 value={formData.doctor}
-                onChange={(e) => setFormData({...formData, doctor: e.target.value})}
+                onChange={(e) => handleDoctorChange(e.target.value)}
                 className="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-400 focus:border-transparent outline-none transition-all duration-300 group-hover:border-teal-300"
               >
                 <option value="">Pilih Dokter Gigi</option>
                 {doctors.map((doc) => (
                   <option key={doc.id} value={doc.id}>
-                    {doc.name} ({doc.specialization}) - {doc.schedule || 'Jadwal: Senin-Jumat'}
+                    {doc.name} - {doc.specialization}
                   </option>
                 ))}
               </select>
+              
+              {/* Doctor Schedule Display */}
+              {selectedDoctor && (
+                <div className="mt-4 p-5 bg-gradient-to-br from-teal-50 to-cyan-50 rounded-xl border-2 border-teal-200 animate-fade-in">
+                  <div className="flex items-start gap-3">
+                    <div className="text-3xl">🗓️</div>
+                    <div>
+                      <h4 className="font-bold text-teal-700 mb-1">Jadwal Praktek:</h4>
+                      <p className="text-gray-700">
+                        {selectedDoctor.schedule || 'Senin - Jumat, 09:00 - 17:00'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
             
             <div className="group">
@@ -266,7 +288,7 @@ export default function HomePage() {
           animation: float 6s ease-in-out infinite;
         }
         .animate-fade-in {
-          animation: fade-in 1s ease-out;
+          animation: fade-in 0.4s ease-out;
         }
       `}</style>
     </main>
