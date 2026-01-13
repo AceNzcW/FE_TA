@@ -104,13 +104,13 @@ export default function HomePage() {
             <table className="w-full">
               <thead>
                 <tr className="bg-teal-50">
-                  <th className="px-6 py-4 text-left text-sm font-bold text-teal-700 uppercase tracking-wider border-b-2 border-teal-200">
+                  <th className="px-6 py-5 text-center text-sm font-bold text-teal-700 uppercase tracking-wider border-b-2 border-teal-200">
                     Nama Dokter
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-bold text-teal-700 uppercase tracking-wider border-b-2 border-teal-200">
+                  <th className="px-6 py-5 text-center text-sm font-bold text-teal-700 uppercase tracking-wider border-b-2 border-teal-200">
                     Spesialisasi
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-bold text-teal-700 uppercase tracking-wider border-b-2 border-teal-200">
+                  <th className="px-6 py-5 text-center text-sm font-bold text-teal-700 uppercase tracking-wider border-b-2 border-teal-200">
                     Jadwal Praktek
                   </th>
                 </tr>
@@ -131,8 +131,8 @@ export default function HomePage() {
                       key={doc.id} 
                       className="hover:bg-teal-50 transition-colors duration-200"
                     >
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center gap-3">
+                      <td className="px-6 py-5">
+                        <div className="flex items-center justify-center gap-3">
                           <div className="w-10 h-10 bg-gradient-to-br from-teal-400 to-cyan-400 rounded-full flex items-center justify-center text-white font-bold">
                             {doc.name?.charAt(0) || 'D'}
                           </div>
@@ -141,12 +141,12 @@ export default function HomePage() {
                           </span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-5 text-center">
                         <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-cyan-100 text-cyan-800">
                           {doc.specialization}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-700">
+                      <td className="px-6 py-5 text-sm text-gray-700 text-center">
                         {doc.schedule || 'Senin - Jumat, 09:00 - 17:00'}
                       </td>
                     </tr>
