@@ -74,13 +74,13 @@ export default function HomePage() {
   return (
     <main className="bg-gradient-to-br from-cyan-50 via-blue-50 to-teal-50 text-gray-800 overflow-hidden">
       {/* Hero Section */}
-      <section className="relative flex flex-col md:flex-row items-center justify-between max-w-6xl mx-auto px-6 py-20 min-h-screen">
+      <section className="relative max-w-6xl mx-auto px-6 py-20 min-h-screen">
         <div className="absolute top-20 left-10 w-72 h-72 bg-cyan-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-teal-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse delay-1000"></div>
         
-        <div className="max-w-lg z-10 animate-fade-in">
+        <div className="max-w-4xl mx-auto z-10 animate-fade-in text-center mb-12">
           <div className="inline-block mb-4 px-4 py-2 bg-white/70 backdrop-blur-sm rounded-full text-sm font-semibold text-teal-700 shadow-md">
-            ✨ Platform Booking #1 di Indonesia
+            ✨ Platform Booking Promedico klinik
           </div>
           <h1 className="text-6xl font-extrabold mb-6 bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent leading-tight">
             Senyum Sehat Dimulai Dari Sini 🦷
@@ -88,31 +88,88 @@ export default function HomePage() {
           <p className="text-xl mb-8 text-gray-700 leading-relaxed">
             Reservasi dokter gigi profesional hanya dalam hitungan detik. Mudah, cepat, dan tanpa ribet!
           </p>
-          <div className="flex gap-4">
-            <a
-              href="#booking"
-              className="group px-8 py-4 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-bold rounded-2xl shadow-2xl hover:shadow-cyan-300/50 hover:scale-105 transition-all duration-300"
-            >
-              <span className="flex items-center gap-2">
-                Booking Sekarang
-                <span className="group-hover:translate-x-1 transition-transform">→</span>
-              </span>
-            </a>
-            <button className="px-8 py-4 border-2 border-teal-500 text-teal-600 font-bold rounded-2xl hover:bg-teal-50 transition-all duration-300 hover:scale-105">
-              Pelajari Lebih
-            </button>
+        </div>
+
+        {/* Tabel Jadwal Dokter */}
+        <div className="relative z-10 bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl overflow-hidden border border-teal-100">
+          <div className="bg-gradient-to-r from-teal-500 to-cyan-500 px-8 py-6">
+            <h2 className="text-3xl font-bold text-white text-center flex items-center justify-center gap-3">
+              <span>👨‍⚕️</span>
+              Jadwal Dokter Kami
+              <span>📅</span>
+            </h2>
+          </div>
+          
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-teal-50">
+                  <th className="px-6 py-4 text-left text-sm font-bold text-teal-700 uppercase tracking-wider border-b-2 border-teal-200">
+                    Nama Dokter
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-bold text-teal-700 uppercase tracking-wider border-b-2 border-teal-200">
+                    Spesialisasi
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-bold text-teal-700 uppercase tracking-wider border-b-2 border-teal-200">
+                    Jadwal Praktek
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {doctors.length === 0 ? (
+                  <tr>
+                    <td colSpan="3" className="px-6 py-12 text-center text-gray-500">
+                      <div className="flex flex-col items-center gap-3">
+                        <span className="text-4xl">⏳</span>
+                        <p className="text-lg">Memuat data dokter...</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  doctors.map((doc) => (
+                    <tr 
+                      key={doc.id} 
+                      className="hover:bg-teal-50 transition-colors duration-200"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-gradient-to-br from-teal-400 to-cyan-400 rounded-full flex items-center justify-center text-white font-bold">
+                            {doc.name?.charAt(0) || 'D'}
+                          </div>
+                          <span className="text-sm font-semibold text-gray-800">
+                            {doc.name}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-cyan-100 text-cyan-800">
+                          {doc.specialization}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-700">
+                        {doc.schedule || 'Senin - Jumat, 09:00 - 17:00'}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
-        
-        <div className="mt-10 md:mt-0 z-10 animate-float">
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-teal-400 to-cyan-400 rounded-full blur-2xl opacity-30"></div>
-            <img
-              src="https://img.icons8.com/?size=200&id=1vM3TXrWurS7&format=png&color=000000"
-              alt="Hero Klinik"
-              className="relative w-96 drop-shadow-2xl transform hover:scale-110 transition-transform duration-500"
-            />
-          </div>
+
+        <div className="flex gap-4 justify-center mt-8">
+          <a
+            href="#booking"
+            className="group px-8 py-4 bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-bold rounded-2xl shadow-2xl hover:shadow-cyan-300/50 hover:scale-105 transition-all duration-300"
+          >
+            <span className="flex items-center gap-2">
+              Booking Sekarang
+              <span className="group-hover:translate-x-1 transition-transform">→</span>
+            </span>
+          </a>
+          <button className="px-8 py-4 border-2 border-teal-500 text-teal-600 font-bold rounded-2xl hover:bg-teal-50 transition-all duration-300 hover:scale-105">
+            Pelajari Lebih
+          </button>
         </div>
       </section>
 
